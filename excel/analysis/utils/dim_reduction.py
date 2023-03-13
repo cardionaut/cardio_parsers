@@ -5,6 +5,7 @@ import os
 
 import pandas as pd
 import plotly.express as px
+from loguru import logger
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from umap import UMAP
@@ -13,6 +14,8 @@ from umap import UMAP
 def plot_bubble(func):
     def wrapper(self, *args):
         data = args[0]
+        if isinstance(data, tuple):
+            data = data[0]
         y_train = data[self.target_label]
         x_train = data.drop(self.target_label, axis=1)
 

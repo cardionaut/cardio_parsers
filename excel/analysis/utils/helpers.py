@@ -103,6 +103,4 @@ def init_estimator(estimator_name: str, task: str, seed, scoring, class_weight):
             raise NotImplementedError
         cv = KFold(shuffle=True, random_state=seed)
 
-    scoring = scoring[task]
-
     return estimator, cv, scoring

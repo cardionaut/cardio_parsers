@@ -19,21 +19,21 @@ dataset:
   strict: False # strict behaviour for cleaner and checker, strict=False leads to fewer patients dropped and possible data imputation later
 
 merge:
-  impute: True # impute missing data
+  impute: False # impute missing data
   peak_values: True # reduce data to peak values (i.e. lose time component)
   overwrite: False # overwrite merged data
 
 analysis:
   experiment:
-    name: "phenomapping" # experiment name (i.e. file name in which to store merged data)
+    name: "ATTRAS_amyloidose" # experiment name (i.e. file name in which to store merged data)
     axes: ["long_axis", "short_axis"] # ['long_axis', 'short_axis']
     metrics: ["strain"] # ['strain', 'strain_rate', 'displacement', 'velocity']
     segments: ["roi"] # ['global', 'aha', 'roi']
     orientations: ["radial", "circumf", "longit"] # ['radial', 'circumf', 'longit']
-    target_label: "mace" # which column to use as label for exploration, feature reduction and analysis
+    target_label: "ATTR_Amyloidose" # which column to use as label for exploration, feature reduction and analysis
 
   run:
-    seed: 67 # random seed
+    seed: 77 # random seed
     variance_thresh: 0.9 # remove binary features with same value in more than variance_thresh subjects
     corr_method: "pearson" # correlation method
     corr_thresh: 0.6 # threshold above which correlated features are removed
@@ -54,12 +54,12 @@ analysis:
       oversample: False # whether to oversample minority class to balance training set
       models:
         {
-          "logistic_regression": False,
+          "logistic_regression": True,
           "forest": False,
           "extreme_forest": False,
           "adaboost": False,
-          "xgboost": True,
-          "ensemble_voting": True,
+          "xgboost": False,
+          "ensemble_voting": False,
         }
       param_grids:
         {
@@ -100,7 +100,8 @@ analysis:
         }
 
     jobs: [
-        # ['variance_threshold', 'z_score_norm', 'correlation', 'fr_all', 'pca', 'tsne', 'umap'],
-        # ['variance_threshold', 'z_score_norm', 'fr_all', 'pca', 'tsne', 'umap'],
-        ["variance_threshold", "z_score_norm", "fr_forest"],
+        # ['umap'],
+        # ['variance_threshold', 'l2_norm', 'umap'],
+        ['variance_threshold', 'z_score_norm', 'correlation', 'fr_forest', 'pca', 'tsne', 'umap'],
+        # ["variance_threshold", "z_score_norm", "correlation", "fr_forest"],
       ]

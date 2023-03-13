@@ -283,6 +283,7 @@ class FeatureReduction:
             f'Feature importance (top {number_of_top_features})'
             f'\n{rfe_estimator} estimator for target: {self.target_label}'
         )
+        plt.xticks(rotation=90)
         plt.tight_layout()
         plt.gca().legend_.remove()
         plt.savefig(os.path.join(self.job_dir, f'feature_importance_{rfe_estimator}.pdf'), dpi=fig.dpi)
@@ -290,32 +291,32 @@ class FeatureReduction:
 
         return data, importances.index.tolist()[::-1]
 
-    def fr_logistic_regression(self, data: pd.DataFrame) -> pd.DataFrame:
+    def fr_logistic_regression(self, data: pd.DataFrame) -> (pd.DataFrame, list):
         """Feature reduction using logistic regression estimator"""
         data, features = self.__reduction(data, 'logistic_regression')
         return data, features
 
-    def fr_forest(self, data: pd.DataFrame) -> pd.DataFrame:
+    def fr_forest(self, data: pd.DataFrame) -> (pd.DataFrame, list):
         """Feature reduction using random forest estimator"""
         data, features = self.__reduction(data, 'forest')
         return data, features
 
-    def fr_extreme_forest(self, data: pd.DataFrame) -> pd.DataFrame:
+    def fr_extreme_forest(self, data: pd.DataFrame) -> (pd.DataFrame, list):
         """Feature reduction using extreme forest estimator"""
         data, features = self.__reduction(data, 'extreme_forest')
         return data, features
 
-    def fr_adaboost(self, data: pd.DataFrame) -> pd.DataFrame:
+    def fr_adaboost(self, data: pd.DataFrame) -> (pd.DataFrame, list):
         """Feature reduction using adaboost estimator"""
         data, features = self.__reduction(data, 'adaboost')
         return data, features
 
-    def fr_xgboost(self, data: pd.DataFrame) -> pd.DataFrame:
+    def fr_xgboost(self, data: pd.DataFrame) -> (pd.DataFrame, list):
         """Feature reduction using xgboost estimator"""
         data, features = self.__reduction(data, 'xgboost')
         return data, features
 
-    def fr_all(self, data: pd.DataFrame) -> pd.DataFrame:
+    def fr_all(self, data: pd.DataFrame) -> (pd.DataFrame, list):
         """Feature reduction using all estimators in an ensemble manner"""
         number_of_estimators = 4
         _, f_features = self.__reduction(data, 'forest')
@@ -363,6 +364,7 @@ class FeatureReduction:
         fig.legend(loc='lower right', borderaxespad=4.5)
         plt.title(f'Feature importance\nAll estimators for target: {self.target_label}')
         plt.xlabel(f'Summed importance (max {number_of_estimators*min_len})')
+        plt.xticks(rotation=90)
         plt.tight_layout()
         plt.gca().legend_.remove()
         plt.savefig(os.path.join(self.job_dir, 'feature_importance_all.pdf'), dpi=fig.dpi)

@@ -72,7 +72,7 @@ class VerifyFeatures(Normaliser):
             best_estimator = optimiser()
             best_estimators.append((model, best_estimator))
             y_pred = best_estimator.predict(self.x_test)
-            logger.info(f'Model was optimised using {self.scoring[self.task]}.')
+            logger.info(f'Model was optimised using {self.scoring}.')
             self.performance_statistics(y_pred)
 
         for ensemble in self.ensemble:

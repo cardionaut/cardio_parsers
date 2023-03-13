@@ -2,6 +2,7 @@
 """
 
 import os
+import re
 import sys
 
 import hydra
@@ -9,12 +10,14 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 from omegaconf import DictConfig
+from sklearn.experimental import enable_iterative_imputer  # because of bug in sklearn
+from sklearn.impute import IterativeImputer, KNNImputer, MissingIndicator, SimpleImputer
 from sklearn.model_selection import train_test_split
 
 from excel.analysis.utils.exploration import ExploreData
+from excel.analysis.utils.helpers import target_statistics
 from excel.analysis.utils.merge_data import MergeData
 from excel.analysis.verifications import VerifyFeatures
-from excel.analysis.utils.helpers import target_statistics
 
 # pd.set_option('display.max_rows', None)
 # pd.set_option('display.max_columns', None)
@@ -47,8 +50,27 @@ class Analysis:
             merger()
 
         data = pd.read_excel(merged_path)  # Read in merged data
-        data = data.set_index('subject')  # Use subject ID as index column
+        data = data.set_index('ATTRAS_Redcap')  # Use subject ID as index column
         task, stratify = target_statistics(data, self.target_label)
+        self.config.analysis.run.scoring = self.config.analysis.run.scoring[task]
+
+        # ATTRAS-specific imputation
+        reg = re.compile('([A-Za-z]+(_[A-Za-z]+)+)_[0-9]+')
+        single_seg_cols = list(filter(reg.match, data.columns))
+        logger.debug(single_seg_cols)
+        data = data.drop(single_seg_cols, axis=1)
+        data = data.apply(pd.to_numeric, errors='coerce')
+        nunique = data.nunique()
+        non_binary_cols = nunique[nunique != 2].index
+        data[non_binary_cols] = data[non_binary_cols].replace(0, np.nan)
+        imputer = IterativeImputer(
+            initial_strategy='median',
+            max_iter=100,
+            random_state=self.seed,
+            keep_empty_features=True,
+        )
+        imp_data = imputer.fit_transform(data)
+        data = pd.DataFrame(imp_data, index=data.index, columns=data.columns)
 
         if 0 < self.explore_frac < 1:
             explore_data, verification_data = train_test_split(
